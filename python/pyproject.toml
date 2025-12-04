@@ -1,0 +1,16 @@
+[project]
+name = "python"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12, <3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "approvaltests>=16.1.0",
+    "black>=25.11.0",
+    "coverage>=7.12.0",
+    "pytest>=9.0.1",
+    "pytest-approvaltests>=0.2.4",
+]
