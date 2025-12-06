@@ -15,7 +15,7 @@ python -m unittest
 For e.g. 10 days:
 
 ```
-python texttest_fixture.py 10
+python main.py 10
 ```
 
 You should make sure the command shown above works when you execute it in a terminal before trying to use TextTest (see below).
@@ -25,7 +25,7 @@ You should make sure the command shown above works when you execute it in a term
 
 There are instructions in the [TextTest Readme](../texttests/README.md) for setting up TextTest. You will need to specify the Python executable and interpreter in [config.gr](../texttests/config.gr). Uncomment these lines:
 
-    executable:${TEXTTEST_HOME}/python/texttest_fixture.py
+    executable:${TEXTTEST_HOME}/python/main.py
     interpreter:python
 
 ## Run the ApprovalTests.Python test
