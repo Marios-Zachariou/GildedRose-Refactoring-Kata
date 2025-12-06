@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from item import Item
+from item import Item, ItemStore, ItemCategory
 from gilded_rose import GildedRose
 
 
@@ -18,6 +18,19 @@ def main():
         Item(name="Backstage passes to a TAFKAL80ETC concert", sell_in=5, quality=49),
         Item(name="Conjured Mana Cake", sell_in=3, quality=6),  # <-- :O
     ]
+    
+   
+    [ItemStore.register_item_category(item, category) for item, category in [
+        (items[0], ItemCategory.NORMAL),
+        (items[1], ItemCategory.AGING),
+        (items[2], ItemCategory.NORMAL),
+        (items[3], ItemCategory.LEGENDARY),
+        (items[4], ItemCategory.LEGENDARY),
+        (items[5], ItemCategory.CONCERT),
+        (items[6], ItemCategory.CONCERT),
+        (items[7], ItemCategory.CONCERT),
+        (items[8], ItemCategory.CONJURED),
+    ]]
     days = 2
     import sys
     if len(sys.argv) > 1:

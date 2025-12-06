@@ -7,7 +7,7 @@ Each strategy encapsulates the update logic for a specific item type.
 """
 
 from abc import ABC, abstractmethod
-from item import Item
+from item import Item, ItemStore, ItemCategory
 
 
 class ItemUpdateStrategy(ABC):
@@ -52,12 +52,12 @@ class NormalItemStrategy(ItemUpdateStrategy):
         item.quality = self._clamp_quality(item.quality - degradation)
 
 
-class AgedBrieStrategy(ItemUpdateStrategy):
-    """Strategy for Aged Brie which increases in quality over time."""
+class AgingItemStrategy(ItemUpdateStrategy):
+    """Strategy for aging items which increase in quality over time (e.g., Aged Brie, fine wine)."""
 
     def update(self, item: Item) -> None:
         """
-        Update Aged Brie: quality increases by 1, or by 2 after sell_in date.
+        Update aging item: quality increases by 1, or by 2 after sell_in date.
 
         Args:
             item: The item to update
@@ -67,30 +67,30 @@ class AgedBrieStrategy(ItemUpdateStrategy):
         item.quality = self._clamp_quality(item.quality + improvement)
 
 
-class SulfurasStrategy(ItemUpdateStrategy):
-    """Strategy for Sulfuras, a legendary item that never changes."""
+class LegendaryItemStrategy(ItemUpdateStrategy):
+    """Strategy for legendary items that never change (e.g., Sulfuras, mythical artifacts)."""
 
     def update(self, item: Item) -> None:
         """
-        Update Sulfuras: no changes (legendary item with quality 80).
+        Update legendary item: no changes (quality and sell_in remain constant).
 
         Args:
             item: The item to update
         """
-        # Sulfuras never changes - it's legendary!
+        # Legendary items never change!
         pass
 
 
-class BackstagePassStrategy(ItemUpdateStrategy):
-    """Strategy for Backstage passes which increase in value as concert approaches."""
+class ConcertItemStrategy(ItemUpdateStrategy):
+    """Strategy for concert/event items that increase in value as the event approaches."""
 
     def update(self, item: Item) -> None:
         """
-        Update Backstage pass:
+        Update concert item (e.g., backstage passes):
         - More than 10 days: quality +1
         - 10 days or less: quality +2
         - 5 days or less: quality +3
-        - After concert (sell_in < 0): quality drops to 0
+        - After event (sell_in < 0): quality drops to 0
 
         Args:
             item: The item to update
@@ -98,10 +98,10 @@ class BackstagePassStrategy(ItemUpdateStrategy):
         item.sell_in -= 1
 
         if item.sell_in < 0:
-            # Concert has passed, no value
+            # Event has passed, no value
             item.quality = 0
         else:
-            # Determine quality increase based on days until concert
+            # Determine quality increase based on days until event
             if item.sell_in < 5:
                 improvement = 3
             elif item.sell_in < 10:
@@ -125,3 +125,40 @@ class ConjuredItemStrategy(ItemUpdateStrategy):
         item.sell_in -= 1
         degradation = 4 if item.sell_in < 0 else 2
         item.quality = self._clamp_quality(item.quality - degradation)
+
+
+class ItemStrategyFactory:
+    """
+    Factory class for creating appropriate update strategies based on item category.
+    
+    Uses ItemStore to determine item category, eliminating the need for string matching.
+    """
+
+    # Strategy instances mapped to categories (reusable for better performance)
+    _strategies: dict[ItemCategory, ItemUpdateStrategy] = {
+        ItemCategory.NORMAL: NormalItemStrategy(),
+        ItemCategory.AGING: AgingItemStrategy(),
+        ItemCategory.LEGENDARY: LegendaryItemStrategy(),
+        ItemCategory.CONCERT: ConcertItemStrategy(),
+        ItemCategory.CONJURED: ConjuredItemStrategy(),
+    }
+
+    @classmethod
+    def get_strategy(cls, item: Item) -> ItemUpdateStrategy:
+        """
+        Get the appropriate update strategy for an item.
+        
+        Uses ItemStore to determine the item's category, then returns
+        the corresponding strategy. This approach:
+        - Separates categorization logic from strategy selection
+        - Allows database-driven item categories in production
+        - Makes the code more maintainable and testable
+
+        Args:
+            item: The item to get a strategy for
+
+        Returns:
+            The appropriate ItemUpdateStrategy instance
+        """
+        category = ItemStore.get_item_category(item.name)
+        return cls._strategies[category]
